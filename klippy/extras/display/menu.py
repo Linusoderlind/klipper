@@ -805,31 +805,30 @@ class MenuVSDCard(MenuList):
     def __init__(self, manager, config, namespace=''):
         super(MenuVSDCard, self).__init__(manager, config, namespace)
 
-    def _populate_files(self, directory = None, parent = None):
-        root = self._manager.objs.get('virtual_sdcard').sdcard_dirname
-        if directory == None:
-            directory = root
-        if parent == None:
-            parent = self
-        for item in os.listdir(directory):
-            item_path = os.path.join(directory, item)
-            item_rel_path = os.path.relpath(item_path, root)
-            if os.path.isdir(item_path):
+    def _populate_files(self):
+        sdcard = self._manager.objs.get('virtual_sdcard')
+        if sdcard is not None:
+            files = sdcard.get_files_for_menu()
+            self._populate_files_recursive(files, self)
+
+    def _populate_files_recursive(self, directory, parent):
+        for item in directory:
+            if item['type'] == 'folder':
                 folder = MenuList(self._manager, {
-                    'name': '%s' % str(item),
+                    'name': '%s' % str(item['name']),
                     'cursor': '>',
                     'scroll': True,
                     # mind the cursor size in width
                     'width': (self._manager.cols-1)
                 })
                 parent.append_item(folder)
-                self._populate_files(item_path, folder)
-            if os.path.isfile(item_path):
+                self._populate_files_recursive(item['children'], folder)
+            if item['type'] == 'file':
                 gcode = [
-                    'M23 /%s' % str(item_rel_path)
+                    'M23 /%s' % str(item['path'])
                 ]
                 parent.append_item(MenuCommand(self._manager, {
-                    'name': '%s' % str(item),
+                    'name': '%s' % str(item['name']),
                     'cursor': '+',
                     'gcode': "\n".join(gcode),
                     'scroll': True,
@@ -840,7 +839,6 @@ class MenuVSDCard(MenuList):
     def populate_items(self):
         super(MenuVSDCard, self).populate_items()
         self._populate_files()
-
 
 class MenuCard(MenuGroup):
     def __init__(self, manager, config, namespace=''):

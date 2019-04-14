@@ -43,6 +43,29 @@ class VirtualSD:
         if self.work_timer is None:
             return False, ""
         return True, "sd_pos=%d" % (self.file_position,)
+    def get_files_for_menu(self):
+        return self._get_files(self.sdcard_dirname)
+    def _get_files(self, path, base = ''):
+        result  = {}
+        for entry in os.listdir(path):
+            if entry.startswith('.'):
+                #Do not add hidden files or folders
+                continue
+            entry_path = os.path.join(path, entry)
+            entry_isdir = os.path.isdir(entry_path)
+            entry_isfile = os.path.isfile(entry_path)
+            if entry_isfile:
+                result[entry] = dict(
+                    name = entry,
+                    path = entry_path,
+                    type = 'file')
+            if entry_isdir:
+                entry_data = dict(
+                    name = entry,
+                    type = 'folder')
+                entry_data['children'] = self._get_files(entry_path, path)
+                result[entry] = entry_data
+        return result
     def get_file_list(self):
         dname = self.sdcard_dirname
         try:
