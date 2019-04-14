@@ -56,12 +56,10 @@ class VirtualSD:
             entry_isfile = os.path.isfile(entry_path)
             if entry_isfile:
                 result[entry] = dict(
-                    name = entry,
                     path = entry_path,
                     type = 'file')
             if entry_isdir:
                 entry_data = dict(
-                    name = entry,
                     type = 'folder')
                 entry_data['children'] = self._get_files(entry_path, path)
                 result[entry] = entry_data

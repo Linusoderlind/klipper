@@ -812,10 +812,10 @@ class MenuVSDCard(MenuList):
             self._populate_files_recursive(files, self)
 
     def _populate_files_recursive(self, directory, parent):
-        for item in directory:
+        for name, item in directory.items():
             if item['type'] == 'folder':
                 folder = MenuList(self._manager, {
-                    'name': '%s' % str(item['name']),
+                    'name': '%s' % str(name),
                     'cursor': '>',
                     'scroll': True,
                     # mind the cursor size in width
@@ -828,7 +828,7 @@ class MenuVSDCard(MenuList):
                     'M23 /%s' % str(item['path'])
                 ]
                 parent.append_item(MenuCommand(self._manager, {
-                    'name': '%s' % str(item['name']),
+                    'name': '%s' % str(name),
                     'cursor': '+',
                     'gcode': "\n".join(gcode),
                     'scroll': True,
