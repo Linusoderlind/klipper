@@ -52,15 +52,11 @@ class VirtualSD:
                 #Do not add hidden files or folders
                 continue
             entry_path = os.path.join(path, entry)
-            entry_isdir = os.path.isdir(entry_path)
-            entry_isfile = os.path.isfile(entry_path)
-            if entry_isfile:
-                result[entry] = dict(
-                    path = entry_path,
-                    type = 'file')
-            if entry_isdir:
-                entry_data = dict(
-                    type = 'folder')
+            entry_rel_path = os.path.relpath(entry_path, self.sdcard_dirname)
+            if os.path.isfile(entry_path):
+                result[entry] = {'path':entry_rel_path, 'type':'file'}
+            if os.path.isdir(entry_path):
+                entry_data = {'type':'folder'}
                 entry_data['children'] = self._get_files(entry_path, path)
                 result[entry] = entry_data
         return result
